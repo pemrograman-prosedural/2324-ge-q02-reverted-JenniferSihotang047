@@ -4,6 +4,8 @@
 #include "gender.h"
 #include "dorm.h"
 
+#include <stdio.h>
+
 struct student_t
 {
     char id[12];
@@ -13,7 +15,6 @@ struct student_t
     struct dorm_t *dorm;
 };
 
-struct student_t create_student(char *_id, char *_name, char *_year,
-                                enum gender_t _gender);
+struct student_t create_student(char *_id, char *_name, char *_year,enum gender_t _gender);
 
 #endif

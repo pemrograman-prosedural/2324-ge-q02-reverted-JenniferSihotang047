@@ -1,3 +1,6 @@
+// 12S23009 - Dina Marlina Siagian
+// 12S23047 - Jennifer Hopenes Sihotang
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -82,24 +85,14 @@ void add_dorm(char *_name, unsigned short _capacity, enum gender_t _gender) {
     num_dorms++;
 }
 
-void vacate_dormitory(char *_id, char *_name, enum gender_t _gender) {
-
+void vacate_dormitory(char *_name) {
     for (int i = 0; i < num_dorms; i++) {
-        if (strcmp(dorms[i].name, _name) == 0 && dorms[i].gender == _gender) {
-
-            for (int j = 0; j < num_students; j++) {
-                if (strcmp(students[j].id, _id) == 0 && students[j].dorm == &dorms[i]) {
-
-                    students[j].dorm = NULL;
-                    dorms[i].residents_num--; 
-                    return;
-                }
-            }
-            fprintf(stderr, "Student with ID %s not found in dorm %s\n", _id, _name);
+        if (strcmp(dorms[i].name, _name) == 0) {
+            dorms[i].residents_num = 0;
             return;
         }
     }
-    fprintf(stderr, "Dorm %s not found for gender %s\n", _name, _gender == GENDER_MALE ? "male" : "female");
+    fprintf(stderr, "Dormitory %s not found\n", _name);
 }
 
 void free_dorms() {
@@ -108,7 +101,7 @@ void free_dorms() {
 
 void print_all_dorms() {
     for (int i = 0; i < num_dorms; i++) {
-        printf("%s|%d|%s\n", dorms[i].name, dorms[i].capacity, dorms[i].gender == GENDER_MALE ? "male" : "female");
+        printf("%s|%d|%s|%d\n", dorms[i].name, dorms[i].capacity, dorms[i].gender == GENDER_MALE ? "male" : "female", dorms[i].residents_num);
     }
 }
 
@@ -150,9 +143,13 @@ int main(int argc, char **argv) {
                 }
 
                 add_student(id, name, year, gender);
-            } else if (strcmp(token, "student-print-all") == 0) {
+            } else if (strcmp(token, "student-print-all-detail") == 0) {
                 for (int i = 0; i < num_students; i++) {
-                    printf("%s|%s|%s|%s\n", students[i].id, students[i].name, students[i].year, students[i].gender == GENDER_MALE ? "male" : "female");
+                    if (students[i].dorm != NULL) {
+                        printf("%s|%s|%s|%s|%s\n", students[i].id, students[i].name, students[i].year, students[i].gender == GENDER_MALE ? "male" : "female", students[i].dorm->name);
+                    } else {
+                        printf("%s|%s|%s|%s|unassigned\n", students[i].id, students[i].name, students[i].year, students[i].gender == GENDER_MALE ? "male" : "female");
+                    }
                 }
             } else if (strcmp(token, "dorm-add") == 0) {
                 char name[20];
@@ -174,40 +171,37 @@ int main(int argc, char **argv) {
                 }
 
                 add_dorm(name, capacity, gender);
-            } else if (strcmp(token, "assign-student") == 0) {
-              char id[12];
-              char name[20];
-
-              token = strtok(NULL, "#\n");
-              strncpy(id, token, sizeof(id) - 1);
-              id[sizeof(id) - 1] = '\0';
-
-              token = strtok(NULL, "#\n");
-              strncpy(name, token, sizeof(name) - 1);
-              name[sizeof(name) - 1] = '\0';
-
-              int found = 0;
-        for (int i = 0; i < num_students; i++) {
-        if (strcmp(students[i].id, id) == 0) {
-
-            for (int j = 0; j < num_dorms; j++) {
-                if (strcmp(dorms[j].name, name) == 0) {
-                    students[i].dorm = &dorms[j];
-                    dorms[j].residents_num++;
-                    found = 1;
-                    break;
+            } else if (strcmp(token, "dorm-print-all-detail") == 0) {
+                for (int i = 0; i < num_dorms; i++) {
+                    printf("%s|%d|%s|%d\n", dorms[i].name, dorms[i].capacity, dorms[i].gender == GENDER_MALE ? "male" : "female", dorms[i].residents_num);
                 }
-            }
-            break;
-        }
-    }
+            } else if (strcmp(token, "assign-student") == 0) {
+                char id[12];
+                char dorm_name[20];
 
-    if (!found) {
-        fprintf(stderr, "Student with ID %s not found or dorm %s not found\n", id, name);
-    }
+                token = strtok(NULL, "#\n");
+                strncpy(id, token, sizeof(id) - 1);
+                id[sizeof(id) - 1] = '\0';
 
-            } else if (strcmp(token, "dorm-print-all") == 0) {
-                print_all_dorms();
+                token = strtok(NULL, "#\n");
+                strncpy(dorm_name, token, sizeof(dorm_name) - 1);
+                dorm_name[sizeof(dorm_name) - 1] = '\0';
+
+                for (int i = 0; i < num_students; i++) {
+                    if (strcmp(students[i].id, id) == 0) {
+                        for (int j = 0; j < num_dorms; j++) {
+                            if (strcmp(dorms[j].name, dorm_name) == 0) {
+                                students[i].dorm = &dorms[j];
+                                dorms[j].residents_num++;
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+            } else if (strcmp(token, "dorm-empty") == 0) {
+                token = strtok(NULL, "#\n");
+                vacate_dormitory(token);
             } else if (strcmp(token, "---") == 0) {
                 break;
             }
@@ -216,6 +210,6 @@ int main(int argc, char **argv) {
 
     free_students();
     free_dorms();
-    
+
     return 0;
 }
