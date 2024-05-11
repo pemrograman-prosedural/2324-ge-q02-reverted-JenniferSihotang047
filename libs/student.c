@@ -19,4 +19,3 @@ struct student_t create_student(char *_id, char *_name, char *_year, enum gender
   return student;
 }
 
-

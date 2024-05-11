@@ -9,9 +9,8 @@ struct dorm_t
   unsigned short capacity;
   enum gender_t gender;
   unsigned short residents_num;
-  char id[12];
-  char year[5];
 };
 
-struct dorm_t create_dorm(char *_name, unsigned short _capacity, enum gender_t _gender, char *_id, char *_year);
+struct dorm_t create_dorm(char *_name, unsigned short _capacity, enum gender_t _gender);
+
 #endif

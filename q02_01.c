@@ -1,6 +1,3 @@
-// 12S23009 - Dina Marlina Siagian
-// 12S23047 - Jennifer Hopenes Sihotang
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -85,24 +82,24 @@ void add_dorm(char *_name, unsigned short _capacity, enum gender_t _gender) {
     num_dorms++;
 }
 
-void vacate_dormitory (char *_id, char*_name,unsigned short _capacity, enum gender_t _gender){
-       if (num_dorms >= dorm_capacity) {
-        dorm_capacity *= 2;
-        dorms = realloc(dorms, dorm_capacity * sizeof(struct dorm_t));
-        if (dorms == NULL) {
-            fprintf(stderr, "Failed to allocate memory for dorms\n");
-            exit(1);
+void vacate_dormitory(char *_id, char *_name, enum gender_t _gender) {
+
+    for (int i = 0; i < num_dorms; i++) {
+        if (strcmp(dorms[i].name, _name) == 0 && dorms[i].gender == _gender) {
+
+            for (int j = 0; j < num_students; j++) {
+                if (strcmp(students[j].id, _id) == 0 && students[j].dorm == &dorms[i]) {
+
+                    students[j].dorm = NULL;
+                    dorms[i].residents_num--; 
+                    return;
+                }
+            }
+            fprintf(stderr, "Student with ID %s not found in dorm %s\n", _id, _name);
+            return;
         }
     }
-
-    struct dorm_t em_dorm;
-    strncpy(em_dorm.name, _name, sizeof(em_dorm.name)-1);
-    strncpy(em_dorm.id, _id, sizeof(em_dorm.id)-1);
-    strncpy(em_dorm.year, _year, sizeof (em_dorm.year)-1);
-    em_dorm.gender = _gender;
-    em_dorm.residents_num = 0;
-    dorms[num_dorms] = em_dorm;
-    em_dorm++;
+    fprintf(stderr, "Dorm %s not found for gender %s\n", _name, _gender == GENDER_MALE ? "male" : "female");
 }
 
 void free_dorms() {
@@ -157,10 +154,6 @@ int main(int argc, char **argv) {
                 for (int i = 0; i < num_students; i++) {
                     printf("%s|%s|%s|%s\n", students[i].id, students[i].name, students[i].year, students[i].gender == GENDER_MALE ? "male" : "female");
                 }
-            }else if (strcmp(token, "student-print-all-detail") == 0) {
-                for (int i = 0; i < num_students; i++) {
-                    printf("%s|%s|%s|%s|unassigned\n", students[i].id, students[i].name, students[i].year, students[i].gender == GENDER_MALE ? "male" : "female");
-                }
             } else if (strcmp(token, "dorm-add") == 0) {
                 char name[20];
                 unsigned short capacity;
@@ -181,29 +174,40 @@ int main(int argc, char **argv) {
                 }
 
                 add_dorm(name, capacity, gender);
+            } else if (strcmp(token, "assign-student") == 0) {
+              char id[12];
+              char name[20];
+
+              token = strtok(NULL, "#\n");
+              strncpy(id, token, sizeof(id) - 1);
+              id[sizeof(id) - 1] = '\0';
+
+              token = strtok(NULL, "#\n");
+              strncpy(name, token, sizeof(name) - 1);
+              name[sizeof(name) - 1] = '\0';
+
+              int found = 0;
+        for (int i = 0; i < num_students; i++) {
+        if (strcmp(students[i].id, id) == 0) {
+
+            for (int j = 0; j < num_dorms; j++) {
+                if (strcmp(dorms[j].name, name) == 0) {
+                    students[i].dorm = &dorms[j];
+                    dorms[j].residents_num++;
+                    found = 1;
+                    break;
+                }
+            }
+            break;
+        }
+    }
+
+    if (!found) {
+        fprintf(stderr, "Student with ID %s not found or dorm %s not found\n", id, name);
+    }
+
             } else if (strcmp(token, "dorm-print-all") == 0) {
                 print_all_dorms();
-            } else if (strcmp(token, "dorm-print-all-detail") == 0) {
-                  for (int i = 0; i < num_dorms; i++) {
-                        printf("%s|%s|%s|unassigned\n", dorms[i].id, dorms[i].name, dorms[i].year, dorms[i].gender == GENDER_MALE ? "male" : "female");
-                }  
-            } else if (strcmp(token, "assign-student")==0){
-                char name[20];
-                char id[12];
-
-                token = strtok(NULL, "#\n");
-                strncpy(name, token, sizeof(name) - 1);
-                name[sizeof(name) - 1] = '\0';
-
-                token = strtok(NULL, "#\n");
-                strncpy(id, token, sizeof(id) - 1);
-                id[sizeof(id) - 1] = '\0';                
-
-                vacate_dorm(name, id);
-            }else if(strcmp(token, "dorm-empty")==0){
-                for (int i = 0; i < num_dorms; i++) {
-                printf("%s|%d|%s|%d\n", dorms[i].name, dorms[i].capacity, dorms[i].gender == GENDER_MALE ? "male" : "female", dorms[i].residents_num);
-            }
             } else if (strcmp(token, "---") == 0) {
                 break;
             }
