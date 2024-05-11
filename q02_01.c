@@ -96,9 +96,9 @@ void vacate_dormitory (char *_id, char*_name,unsigned short _capacity, enum gend
     }
 
     struct dorm_t em_dorm;
-    strcnpy(em_dorm.name, _name, sizeof(em_dorm.name)-1);
-    strcnpy(em_dorm.id, _id, sizeof(em_dorm.id)-1);
-    strcnpy(em_dorm.year, _year, sizeof (em_dorm.year)-1);
+    strncpy(em_dorm.name, _name, sizeof(em_dorm.name)-1);
+    strncpy(em_dorm.id, _id, sizeof(em_dorm.id)-1);
+    strncpy(em_dorm.year, _year, sizeof (em_dorm.year)-1);
     em_dorm.gender = _gender;
     em_dorm.residents_num = 0;
     dorms[num_dorms] = em_dorm;
@@ -185,7 +185,7 @@ int main(int argc, char **argv) {
                 print_all_dorms();
             } else if (strcmp(token, "dorm-print-all-detail") == 0) {
                   for (int i = 0; i < num_dorms; i++) {
-                        printf("%s|%d|%s|%d\n", dorms[i].name, dorms[i].capacity, dorms[i].gender == GENDER_MALE ? "male" : "female", dorms[i].residents_num);
+                        printf("%s|%s|%s|unassigned\n", dorms[i].id, dorms[i].name, dorms[i].year, dorms[i].gender == GENDER_MALE ? "male" : "female");
                 }  
             } else if (strcmp(token, "assign-student")==0){
                 char name[20];
@@ -200,7 +200,10 @@ int main(int argc, char **argv) {
                 id[sizeof(id) - 1] = '\0';                
 
                 vacate_dorm(name, id);
-
+            }else if(strcmp(token, "dorm-empty")==0){
+                for (int i = 0; i < num_dorms; i++) {
+                printf("%s|%d|%s|%d\n", dorms[i].name, dorms[i].capacity, dorms[i].gender == GENDER_MALE ? "male" : "female", dorms[i].residents_num);
+            }
             } else if (strcmp(token, "---") == 0) {
                 break;
             }

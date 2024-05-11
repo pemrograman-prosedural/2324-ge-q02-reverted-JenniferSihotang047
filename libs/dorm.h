@@ -13,5 +13,5 @@ struct dorm_t
   char year[5];
 };
 
-struct dorm_t create_dorm(char *_name, unsigned short _capacity, enum gender_t _gender);
+struct dorm_t create_dorm(char *_name, unsigned short _capacity, enum gender_t _gender, char *_id, char *_year);
 #endif
